@@ -1,61 +1,41 @@
 <?php
 
-//make this class final
-class RecipeFinder{
+//class that reads input csv and JSON file and recommend a suitible recipe
+final class RecipeFinder{
 
+	//attributtes
 	private $fridgeCsvFile;
 	private $recipeJsonFile;
 	private $fridgeIngredients = array();
 	private $recipes = array();
 	
+	//class constructor
 	public function __construct($fridgeCsvFile, $recipeJsonFile){
 		$this->fridgeCsvFile = $fridgeCsvFile;
 		$this->recipeJsonFile = $recipeJsonFile;
 		$this->readFridgeCsvFile($this->fridgeCsvFile);
 		$this->readRecipeJsonFile($this->recipeJsonFile);
 	}
-	
-	public function getFridgeIngredients(){
-		return $this->fridgeIngredients;
-	}
-	
-	public function getRecipes(){
-		return $this->recipes;
-	}
-	
+
+	//logic to recommend recipe based on requirement in test. 
+	//Currently assuming fridge list csv file cannot contain multiple entries of same item. Works for provided sample
 	public function recommendRecipe(){
 		$recommendedRecipe = null;
 		$recipeExpiry = null;
 		for($rcpCounter=0;$rcpCounter<count($this->recipes);$rcpCounter++){
 			$currentRecipe = $this->recipes[$rcpCounter];
 			$ingredientsRequired = $currentRecipe->getingredients();
-			
-			list($ingredientAvailableToMakeRecipe, $recipeExpiryDate) =  $this->areIngredientsInFridge($ingredientsRequired);
-			
-			//////////////remove///////////////////////
-			if($ingredientAvailableToMakeRecipe){
-				//echo "\nIngredient available for: " . $currentRecipe->getName(). ", recipe expiry = " . $recipeExpiryDate->format(EXPIRY_DATE_FORMAT) . "\n\n\n\n\n"; 
-			}else{
-				//echo "\nIngredient not available for: " . $currentRecipe->getName(). "\n\n\n\n\n"; 
-			}
-			//////////////end remove///////////////////////
-			
-			
+			list($ingredientAvailableToMakeRecipe, $recipeExpiryDate) =  $this->areIngredientsInFridge($ingredientsRequired);	
 			if($ingredientAvailableToMakeRecipe){
 				if(is_null($recipeExpiry)){
 					$recommendedRecipe = $currentRecipe->getName();
 					$recipeExpiry = $recipeExpiryDate;
-				}else if($recipeExpiryDate < $recipeExpiry){ ///consider <=
+				}else if($recipeExpiryDate < $recipeExpiry){
 					$recommendedRecipe = $currentRecipe->getName();
 					$recipeExpiry = $recipeExpiryDate;
 				}
 			}
-			//print_r($b);
-			//echo "\n\nFirst recipe end \n";;
-			//break;
 		}
-		//echo "\n\n\n recommendedRecipe={$recommendedRecipe}\n";
-		//echo "\n\n\n recommendedExpiry={$recipeExpiry->format(EXPIRY_DATE_FORMAT)}\n";
 		
 		if(is_null($recommendedRecipe)){
 			return "Order Takeout";
@@ -63,63 +43,24 @@ class RecipeFinder{
 		
 		return $recommendedRecipe;
 	}
-	/*
-	private function getRecipesPossibleFromFrdge($recipe){
-		
-		//echo "\nRecipe Name: " . $recipe->getName()."\n";
-		$ingredientsRequired = $recipe->getingredients(); 
-		$ingredientAvailableForRecipe = array();
-		
-		//if($this->areIngredientsInFridge($ingredientsRequired)){
-		//	echo "\nIngredient available for: " . $recipe->getName(). "\n\n\n\n"; 
-		//}else{
-			//echo "\nIngredient not available for: " . $recipe->getName(). "\n\n\n\n\n"; 
-		//}
-		
-		list($ingredientAvailableToMakeRecipe, $recipeExpiryDate) =  $this->areIngredientsInFridge($ingredientsRequired);
-		
-		
-		if($ingredientAvailableToMakeRecipe){
-			echo "\nIngredient available for: " . $recipe->getName(). ", recipe expiry = " . $recipeExpiryDate->format(EXPIRY_DATE_FORMAT) . "\n\n\n\n\n"; 
-		}else{
-			echo "\nIngredient not available for: " . $recipe->getName(). "\n\n\n\n\n"; 
-		}
-		
-		return $ingredientAvailableForRecipe;
-		
-	}
-	*/
 	
+	//check fridge to see if ingredients are available to make a recipe
 	private function areIngredientsInFridge($ingredientsRequiredForRecipe){
-		
 		$recipeExpireDate = null;
 		for($i=0;$i<count($ingredientsRequiredForRecipe);$i++){
-		
+			$ingrdntInFrdge = false;		
 			$ingredient = $ingredientsRequiredForRecipe[$i]; //required for recipe
 			$ingredientRequiredForRecipe = $ingredient->getItem();
 			$ingredientAmtRequiredForRecipe = $ingredient->getAmount();
-			
-			//echo "\ningredientRequiredForRecipe = {$ingredientRequiredForRecipe}\n";
-			//echo "\ningredientAmtRequiredForRecipe = {$ingredientAmtRequiredForRecipe}\n";
-			//$fridgeIngredients
-			$ingrdntInFrdge = false;
 			for($m=0;$m<count($this->fridgeIngredients);$m++){
 				$currentFrdgIngrdnt = $this->fridgeIngredients[$m];
 				$currentFrdgIngrdntName = $currentFrdgIngrdnt->getIngredient()->getItem();
 				$currentFrdgIngrdntAmt = $currentFrdgIngrdnt->getIngredient()->getAmount();
 				$currentFrdgIngrdntUseByDate = $currentFrdgIngrdnt->getUseByDate();
-				
 				if($ingredientRequiredForRecipe != $currentFrdgIngrdntName){
 					continue;
 				}else{
-					//echo "\ncurrentFrdgIngrdntName = {$currentFrdgIngrdntName}\n";
-					//echo "\ningredientAmtRequiredForRecipe = {$ingredientAmtRequiredForRecipe}\n";
-					//echo "\ncurrentFrdgIngrdntAmt = {$currentFrdgIngrdntAmt}\n";
-					//$tmp = $currentFrdgIngrdnt->isExpired();
-					//echo "\ncurrentFrdgIngrdnt->isExpired() = {$tmp}\n";
-					
 					if($ingredientAmtRequiredForRecipe <= $currentFrdgIngrdntAmt  && !$currentFrdgIngrdnt->isExpired()){
-						//echo "here";
 						$ingrdntInFrdge = true;
 						if(is_null($recipeExpireDate)){
 							$recipeExpireDate = $currentFrdgIngrdnt->getUseByDate();
@@ -130,18 +71,6 @@ class RecipeFinder{
 						return array(false, null);
 					}
 				}
-				//echo "\currentFrdgIngrdntName = {$currentFrdgIngrdntName}\n";
-				//echo "\ncurrentFrdgIngrdntAmt = {$currentFrdgIngrdntAmt}\n";
-				//var_dump($currentFrdgIngrdntUseByDate);
-				//echo "\ncurrentFrdgIngrdntUseByDate = {$currentFrdgIngrdntUseByDate->format('d/m/Y')}\n";//var_dump($currentFrdgIngrdntUseByDate)."\n";
-				///echo "\ningredientRequiredForRecipe = {$ingredientRequiredForRecipe}\n";
-				
-				//if($currentFrdgIngrdnt->isExpired()){
-					//echo "\nexpired\n";
-				//}else{
-					//echo "\nnot expired\n";
-				//}
-				
 			}
 			
 			if($ingrdntInFrdge){
@@ -153,7 +82,7 @@ class RecipeFinder{
 		return array(true, $recipeExpireDate);
 	}
 	
-	
+	//parse fridge csv file and set fridge ingredients available 
 	private function readFridgeCsvFile($fridgeCvFile){
 		$frdgCsvHndlr = fopen($fridgeCvFile,"r");
 		while(!feof($frdgCsvHndlr)){
@@ -167,6 +96,7 @@ class RecipeFinder{
 		fclose($frdgCsvHndlr);
 	}
 
+	//parse recipie JSON file and set recipes available 
 	private function readRecipeJsonFile($recipeJsonFile){
 		$recipeJson = json_decode(file_get_contents($recipeJsonFile), true);
 		if($recipeJson){
@@ -191,6 +121,4 @@ class RecipeFinder{
 			throw new Exception("Error: file format error, expecting JSON recipe file");
 		}
 	}
-	//create function to check file format exception
-
 }

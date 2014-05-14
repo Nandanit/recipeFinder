@@ -2,6 +2,7 @@
 
 include_once '../config.php';
 
+//unit test class
 class RecipeTest extends PHPUnit_Framework_TestCase{
 
 	protected $recipe;

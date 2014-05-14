@@ -2,6 +2,7 @@
 
 include_once '../config.php';
 
+//unit test class
 class IngredientTest extends PHPUnit_Framework_TestCase{
 
 	protected $ingredient;
@@ -25,7 +26,6 @@ class IngredientTest extends PHPUnit_Framework_TestCase{
 		$actual = $this->ingredient->getAmount();
 		$this->assertEquals($expected, $actual);
 	}
-	
 	
 }
 
