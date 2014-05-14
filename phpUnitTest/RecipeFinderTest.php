@@ -16,7 +16,7 @@ class RecipeFinderTest extends PHPUnit_Framework_TestCase{
     }
 	
 	public function testRecommendRecipe() {
-        $expected = "Order Takeout";
+        $expected = "grilled cheese on toast";
         $actual = $this->recipeFinder->recommendRecipe();
         $this->assertEquals($expected, $actual);
     }

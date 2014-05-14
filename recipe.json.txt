@@ -14,4 +14,4 @@
 							{ "item":"mixed salad", "amount":"200", "unit":"grams"} 
 						] 
 	} 
-] 
+]
