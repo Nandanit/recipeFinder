@@ -3,7 +3,7 @@
 Recipe Finder Application Usage
 -------------------------------
 
-1. Download GitHib
+1. Download ZIP from zubairJoarder/recipeFinder repository in GitHib
 
 2. Extract content to recipeFinder-master
 

@@ -25,9 +25,18 @@ class Ingredient{
 		return $this->item;
 	}
 	
+	public function setItem($item){
+		$this->item = $item;
+	}
+	
 	public function getAmount(){
 		return $this->amount;
 	}
+	
+	public function setAmount($amount){
+		$this->amount = $amount;
+	}
+	
 	/******* end setters getters ***********/
 	
 	public function __toString(){
